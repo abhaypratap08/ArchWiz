@@ -68,7 +68,7 @@ archwiz --interactive .
 
 
 archwiz --help
-
+```
 
 --- 
 
