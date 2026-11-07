@@ -25,35 +25,56 @@ Prebuilt binaries are distributed through GitHub Releases. **Rust and Cargo are 
 **Linux**
 
 ```sh
-curl --proto '=https' --tlsv1.2 -LsSf https://github.com/abhaypratap08/ArchWiz/releases/latest/download/archwiz-installer.sh | sh
+curl --proto '=https' --tlsv1.2 -LsSf https://github.com/abhaypratap08/ArchWiz/releases/latest/download/archwiz-installer.sh | env INSTALLER_NO_MODIFY_PATH=1 sh
 ```
 
 **Windows (PowerShell)**
 
 ```powershell
+$env:INSTALLER_NO_MODIFY_PATH = "1"
 irm https://github.com/abhaypratap08/ArchWiz/releases/latest/download/archwiz-installer.ps1 | iex
+Remove-Item Env:INSTALLER_NO_MODIFY_PATH
 ```
 
-> **Note:** Binary installers will become available after the first GitHub Release is published.
+**Login and PATH safety:** The documented installer commands disable cargo-dist's automatic PATH modification. ArchWiz will not add commands to `~/.profile`, edit other shell startup files, or modify the Windows PATH registry. The configured install directory is `~/.local/bin` on Unix-like systems. If that directory is not already on your PATH, add it yourself to your interactive shell configuration.
+
+For Fish, run:
+
+```fish
+fish_add_path "$HOME/.local/bin"
+```
+
+For Bash or Zsh, add the following line to `~/.bashrc` or `~/.zshrc`, respectively:
+
+```sh
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+Then open a new terminal or reload the relevant shell configuration. Check the installation with `archwiz --version`.
+
+> **Important:** These safety guarantees apply to the documented commands above. Running the raw release installer without `INSTALLER_NO_MODIFY_PATH=1` allows cargo-dist to manage PATH and may modify shell startup files.
 
 ### Custom Installation Directory
 
-You can choose where `archwiz` is installed.
+You can choose where `archwiz` is installed. The installer will still leave PATH and shell startup files unchanged; add the selected directory to PATH yourself if necessary.
 
 **Linux**
 
 ```sh
-curl --proto '=https' --tlsv1.2 -LsSf https://github.com/abhaypratap08/ArchWiz/releases/latest/download/archwiz-installer.sh | ARCHWIZ_INSTALL_DIR="$HOME/Tools/ArchWiz" sh
+curl --proto '=https' --tlsv1.2 -LsSf https://github.com/abhaypratap08/ArchWiz/releases/latest/download/archwiz-installer.sh | env INSTALLER_NO_MODIFY_PATH=1 ARCHWIZ_INSTALL_DIR="$HOME/Tools/ArchWiz" sh
 ```
 
 **Windows (PowerShell)**
 
 ```powershell
+$env:INSTALLER_NO_MODIFY_PATH = "1"
 $env:ARCHWIZ_INSTALL_DIR = "$HOME\Tools\ArchWiz"
 irm https://github.com/abhaypratap08/ArchWiz/releases/latest/download/archwiz-installer.ps1 | iex
+Remove-Item Env:INSTALLER_NO_MODIFY_PATH
+Remove-Item Env:ARCHWIZ_INSTALL_DIR
 ```
 
-Ensure your installation directory is included in your system's `PATH`.
+If you choose a custom directory, add that directory to the PATH configuration for your interactive shell (Fish: `fish_add_path "$HOME/Tools/ArchWiz"`; Bash/Zsh: add `export PATH="$HOME/Tools/ArchWiz:$PATH"` to `~/.bashrc` or `~/.zshrc`). Do not add an unguarded reference to an ArchWiz helper script in `~/.profile`.
 
 ### Manual Installation
 
