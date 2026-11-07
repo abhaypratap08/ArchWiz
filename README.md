@@ -1,74 +1,87 @@
-# ARCHWIZ
+See THE architecture of your codebase
 
-ARCHWIZ is a terminal-native software architecture explorer. It scans a project and renders its structure as a connected flowchart directly in the terminal.
 
-## Installation from source
+A terminal based CLI written in Rust that converts your project structure into an architectural flowchart.
 
-```fish
-cargo install --path .
+
+Where `tree` simply lists all files and folders, ArchWiz shows you how everything is organised in a visual way.
+
+
+## Features
+
+
+Visualise THE architecture of your project
+
+
+Smart categorisation of source, test, config, documentation, and asset files.
+
+
+Intelligently group your files.
+
+
+Evenly placed with orthogonal connections.
+
+
+View statistics about your project such as THE number of files, languages used, directories and storage used.
+
+
+Navigate and explore your project.
+
+
+Respects `.gitignore` and ignores generated files.
+
+
+## Installation
+
+
+Install directly with:
+
+
+```bash
+
+
+curl -fsSL https://raw.githubusercontent.com/abhaypratap08/ArchWiz/main/install.sh | sh
+
+
 ```
+
+
+You will need Rust and Cargo to install from source.
+
 
 ## Usage
 
-```fish
+
+```bash
+
+
 archwiz
-archwiz .
-archwiz ~/Projects/Bravo6
-archwiz --depth 3
-archwiz --exclude target,node_modules
-archwiz --no-color
+
+
+archwiz ~/Projects/YourProject
+
+
+archwiz --stats .
+
+
+archwiz --interactive .
+
+
 archwiz --help
-archwiz --version
-```
 
-## Options
 
-- `-h, --help` Print help
-- `-V, --version` Print version
-- `-d, --depth <N>` Limit directory depth
-- `-e, --exclude <PATTERNS>` Exclude directories (comma separated)
-- `--no-color` Disable terminal colors
-- `--width <COLUMNS>` Override terminal width
+--- 
 
-## Pipeline
+## Status
 
-```text
-Filesystem
-    ↓
-Scanner
-    ↓
-Project Model
-    ↓
-Classifier
-    ↓
-Graph Generator
-    ↓
-Layout Engine
-    ↓
-Terminal Renderer
-```
 
-## Supported classifications
+ArchWiz is a work in progress to learn about Rust, file traversal, graph algorithms, terminal rendering and visualising software architecture.
 
-Source, Test, Configuration, Documentation, Asset, Other.
 
-Source languages: Rust, Java, JavaScript, TypeScript, Python, Go, C, C++, C#, PHP, Ruby, Kotlin, Swift, and more.
+Note: ArchWiz does not look at any real source CODE dependencies, imports or relationships. It only looks at how files and directories are organised and grouped together.
 
-## Exclusion rules
 
-Default excluded directories: `.git`, `target`, `node_modules`, `dist`, `build`. Add more with `--exclude`.
+---
 
-## Limitations
 
-- Directory membership is shown, not source-level dependency analysis.
-- Symlinks are not followed.
-- Interactive navigation is not implemented.
-
-## Development
-
-```fish
-cargo fmt --check
-cargo check
-cargo test
-cargo clippy --all-targets --all-features -- -D warnings
-```
+ARCHWIZ - See THE SYSTEM BEHIND your CODE
