@@ -1,0 +1,23 @@
+# Rust build artifacts
+/target/
+
+# Private agent files
+AGENTS.md
+**/AGENTS.md
+.agents/
+.opencode/
+.claude/
+
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+id_rsa
+id_ed25519
+
+# Editor files
+.vscode/
+.idea/
+.DS_Store

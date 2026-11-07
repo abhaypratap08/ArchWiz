@@ -1,0 +1,19 @@
+[package]
+name = "archwiz"
+version = "0.1.0"
+edition = "2024"
+description = "Terminal-native software architecture explorer"
+license = "MIT"
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+unicode-width = "0.2"
+terminal_size = "0.4"
+ignore = "0.4"
+crossterm = "0.28"
+
+[[bin]]
+name = "archwiz"
+path = "src/main.rs"
+
+[dev-dependencies]
