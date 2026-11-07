@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 description = "Terminal-native software architecture explorer"
 license = "MIT"
+repository = "https://github.com/abhaypratap08/ArchWiz"
 
 [dependencies]
 clap = { version = "4", features = ["derive"] }
@@ -17,3 +18,8 @@ name = "archwiz"
 path = "src/main.rs"
 
 [dev-dependencies]
+
+# The profile that 'dist' will build with
+[profile.dist]
+inherits = "release"
+lto = "thin"
