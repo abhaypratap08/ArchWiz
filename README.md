@@ -54,6 +54,8 @@ Then open a new terminal or reload the relevant shell configuration. Check the i
 
 > **Important:** These safety guarantees apply to the documented commands above. Running the raw release installer without `INSTALLER_NO_MODIFY_PATH=1` allows cargo-dist to manage PATH and may modify shell startup files.
 
+**Existing installations:** This change prevents new installer runs from editing login files; it does not remove a line left by an older installation. If you installed an earlier ArchWiz release, inspect `~/.profile` for an old reference to `~/.config/archwiz/env.sh` or another ArchWiz environment helper. Remove only the stale ArchWiz line after checking it; do not delete or replace the whole profile.
+
 ### Custom Installation Directory
 
 You can choose where `archwiz` is installed. The installer will still leave PATH and shell startup files unchanged; add the selected directory to PATH yourself if necessary.
