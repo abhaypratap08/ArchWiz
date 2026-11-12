@@ -20,6 +20,13 @@ impl Drop for TerminalGuard {
     }
 }
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum ExplorerMode {
+    Browse,
+    Search,
+    Stats,
+}
+
 #[derive(Clone)]
 enum Item {
     Dir(DirectoryNode),
@@ -39,8 +46,7 @@ pub fn run(root: &DirectoryNode, use_color: bool) -> Result<(), String> {
     let mut selected: usize = 0;
     let mut expanded: HashSet<String> = HashSet::new();
     let mut search: String = String::new();
-    let mut searching: bool = false;
-    let mut show_stats: bool = false;
+    let mut mode = ExplorerMode::Browse;
     let mut message: String = String::new();
 
     loop {
@@ -48,6 +54,9 @@ pub fn run(root: &DirectoryNode, use_color: bool) -> Result<(), String> {
         if selected >= items.len() && !items.is_empty() {
             selected = items.len() - 1;
         }
+
+        let searching = mode == ExplorerMode::Search;
+        let show_stats = mode == ExplorerMode::Stats;
 
         draw_screen(
             &current, &items, selected, searching, &search, show_stats, &message, use_color,
@@ -61,10 +70,10 @@ pub fn run(root: &DirectoryNode, use_color: bool) -> Result<(), String> {
                 if searching {
                     match code {
                         KeyCode::Enter => {
-                            searching = false;
+                            mode = ExplorerMode::Browse;
                         }
                         KeyCode::Esc => {
-                            searching = false;
+                            mode = ExplorerMode::Browse;
                             search.clear();
                         }
                         KeyCode::Backspace => {
@@ -82,16 +91,20 @@ pub fn run(root: &DirectoryNode, use_color: bool) -> Result<(), String> {
                     KeyCode::Char('q') => break,
                     KeyCode::Esc => {
                         if show_stats {
-                            show_stats = false;
+                            mode = ExplorerMode::Browse;
                         } else {
                             break;
                         }
                     }
                     KeyCode::Char('s') => {
-                        show_stats = !show_stats;
+                        mode = if show_stats {
+                            ExplorerMode::Browse
+                        } else {
+                            ExplorerMode::Stats
+                        };
                     }
                     KeyCode::Char('/') => {
-                        searching = true;
+                        mode = ExplorerMode::Search;
                         search.clear();
                     }
                     KeyCode::Up | KeyCode::Char('k') => {
@@ -213,6 +226,58 @@ fn build_items(dir: &DirectoryNode, expanded: &HashSet<String>, search: &str) ->
     items
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::model::{DirectoryNode, FileNode, Node};
+    use std::path::PathBuf;
+
+    #[test]
+    fn build_items_filters_search() {
+        let dir = DirectoryNode {
+            name: "root".into(),
+            path: PathBuf::from("/tmp"),
+            children: vec![
+                Node::File(FileNode {
+                    name: "main.rs".into(),
+                    path: PathBuf::from("/tmp/main.rs"),
+                    size_bytes: 1,
+                }),
+                Node::File(FileNode {
+                    name: "lib.rs".into(),
+                    path: PathBuf::from("/tmp/lib.rs"),
+                    size_bytes: 1,
+                }),
+            ],
+        };
+        let expanded = HashSet::new();
+        let items = build_items(&dir, &expanded, "main");
+        assert_eq!(items.len(), 1);
+    }
+
+    #[test]
+    fn build_items_empty_search_returns_all() {
+        let dir = DirectoryNode {
+            name: "root".into(),
+            path: PathBuf::from("/tmp"),
+            children: vec![
+                Node::File(FileNode {
+                    name: "a.rs".into(),
+                    path: PathBuf::from("/tmp/a.rs"),
+                    size_bytes: 1,
+                }),
+                Node::File(FileNode {
+                    name: "b.rs".into(),
+                    path: PathBuf::from("/tmp/b.rs"),
+                    size_bytes: 1,
+                }),
+            ],
+        };
+        let expanded = HashSet::new();
+        let items = build_items(&dir, &expanded, "");
+        assert_eq!(items.len(), 2);
+    }
+}
 fn matches_search(item: &Item, search: &str) -> bool {
     if search.is_empty() {
         return true;
