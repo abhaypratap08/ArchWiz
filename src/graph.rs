@@ -1,6 +1,6 @@
 use crate::classifier::{FileKind, classify_file};
 use crate::grouper::group_directory;
-use crate::model::{DirectoryNode, FileNode, Node};
+use crate::model::{DirectoryNode, Node};
 use crate::theme;
 
 #[derive(Debug)]
@@ -104,8 +104,8 @@ fn add_children(directory: &DirectoryNode, parent_id: usize, graph: &mut Graph) 
                     label: file.name.clone(),
                     subtitle: format!(
                         "{} · {}",
-                        file_kind_label(file),
-                        format_size(file.size_bytes)
+                        crate::classifier::file_kind_label(classify_file(file)),
+                        crate::model::format_size(file.size_bytes)
                     ),
                     kind: GraphNodeKind::File(classify_file(file)),
                     details: Vec::new(),
@@ -132,8 +132,8 @@ fn add_children(directory: &DirectoryNode, parent_id: usize, graph: &mut Graph) 
                     details.push(format!(
                         "{}  [{}]  {}",
                         file.name,
-                        file_kind_label_for(kind),
-                        format_size(file.size_bytes)
+                        crate::classifier::file_kind_label(kind),
+                        crate::model::format_size(file.size_bytes)
                     ));
                     detail_colors.push(theme::kind_color(&GraphNodeKind::File(kind)));
                     group_size += file.size_bytes;
@@ -145,7 +145,7 @@ fn add_children(directory: &DirectoryNode, parent_id: usize, graph: &mut Graph) 
                     subtitle: format!(
                         "GROUP · {} files · {}",
                         group.files.len(),
-                        format_size(group_size)
+                        crate::model::format_size(group_size)
                     ),
                     kind: GraphNodeKind::Group,
                     details,
@@ -181,42 +181,12 @@ fn count_subdirs(dir: &DirectoryNode) -> usize {
 fn count_direct_files(dir: &DirectoryNode) -> usize {
     dir.children
         .iter()
-        .filter(|c| matches!(c, Node::File(_)))
-        .count()
-}
-
-fn file_kind_label(file: &FileNode) -> &'static str {
-    match classify_file(file) {
-        FileKind::Source => "SOURCE",
-        FileKind::Test => "TEST",
-        FileKind::Configuration => "CONFIG",
-        FileKind::Documentation => "DOCS",
-        FileKind::Asset => "ASSET",
-        FileKind::Generated => "GEN",
-        FileKind::Other => "OTHER",
-    }
-}
-
-fn file_kind_label_for(kind: FileKind) -> &'static str {
-    match kind {
-        FileKind::Source => "SOURCE",
-        FileKind::Test => "TEST",
-        FileKind::Configuration => "CONFIG",
-        FileKind::Documentation => "DOCS",
-        FileKind::Asset => "ASSET",
-        FileKind::Generated => "GEN",
-        FileKind::Other => "OTHER",
-    }
-}
-
-fn format_size(bytes: u64) -> String {
-    if bytes < 1024 {
-        format!("{bytes} B")
-    } else if bytes < 1024 * 1024 {
-        format!("{:.1} KiB", bytes as f64 / 1024.0)
-    } else {
-        format!("{:.1} MiB", bytes as f64 / (1024.0 * 1024.0))
-    }
+        .map(|c| match c {
+            Node::File(_) => 1,
+            Node::Group(g) => g.files.len(),
+            Node::Directory(_) => 0,
+        })
+        .sum()
 }
 
 #[allow(dead_code)]
@@ -224,15 +194,7 @@ pub fn kind_label(kind: &GraphNodeKind) -> &'static str {
     match kind {
         GraphNodeKind::Project => "PROJECT",
         GraphNodeKind::Directory => "DIRECTORY",
-        GraphNodeKind::File(fk) => match fk {
-            FileKind::Source => "SOURCE",
-            FileKind::Test => "TEST",
-            FileKind::Configuration => "CONFIG",
-            FileKind::Documentation => "DOCS",
-            FileKind::Asset => "ASSET",
-            FileKind::Generated => "GEN",
-            FileKind::Other => "OTHER",
-        },
+        GraphNodeKind::File(fk) => crate::classifier::file_kind_label(*fk),
         GraphNodeKind::Group => "GROUP",
     }
 }

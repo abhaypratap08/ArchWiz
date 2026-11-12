@@ -239,7 +239,11 @@ fn draw_screen(
     let _ = use_color;
     let mut out = String::new();
     out.push_str("\x1b[2J\x1b[H");
-    out.push_str("  ◈ ARCHWIZ  /  INTERACTIVE\n");
+    if use_color {
+        out.push_str("  \x1b[1;38;5;51m◈ ARCHWIZ\x1b[0m  \x1b[38;5;109m/\x1b[0m  \x1b[1mINTERACTIVE\x1b[0m\n");
+    } else {
+        out.push_str("  ◈ ARCHWIZ  /  INTERACTIVE\n");
+    }
     out.push_str(&format!("  Path: {}\n", current.path.display()));
     out.push_str("  ─────────────────────────────────────────\n");
 
@@ -261,7 +265,11 @@ fn draw_screen(
                 }
                 Item::File(f) => format!("{} [FILE] {}", marker, f.name),
             };
-            out.push_str(&format!("  {}\n", line));
+            if use_color && i == selected {
+                out.push_str(&format!("  \x1b[1;38;5;51m{}\x1b[0m\n", line));
+            } else {
+                out.push_str(&format!("  {}\n", line));
+            }
         }
         if items.is_empty() {
             out.push_str("  (empty)\n");

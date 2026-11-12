@@ -69,7 +69,45 @@ pub fn compute_with(graph: &Graph, terminal_width: usize, preview_limit: usize) 
         .map(|n| n.id)
         .unwrap_or(0);
 
-    let (total_w, total_h) = measure(root, &card_widths, &node_heights, &children, available);
+    // Cache each subtree's dimensions once (post-order; child ids are greater than parent ids).
+    let mut dims = vec![(0usize, 0usize); graph.nodes.len()];
+    for id in (0..graph.nodes.len()).rev() {
+        let cw = card_widths[id].min(available).max(10);
+        let ch = node_heights[id];
+        let child_ids = &children[id];
+        if child_ids.is_empty() {
+            dims[id] = (cw, ch);
+            continue;
+        }
+        let child_dims: Vec<(usize, usize)> = child_ids.iter().map(|&c| dims[c]).collect();
+        let rows = wrap_rows(child_ids, &child_dims, available);
+
+        let mut max_row_width = 0usize;
+        let mut total_height = ch + V_GAP;
+        let mut first = true;
+        for row in &rows {
+            let row_width: usize = row.iter().map(|&i| child_dims[i].0).sum::<usize>()
+                + H_GAP * row.len().saturating_sub(1);
+            if row_width > max_row_width {
+                max_row_width = row_width;
+            }
+            let row_height = row
+                .iter()
+                .map(|&i| child_dims[i].1)
+                .max()
+                .unwrap_or(CARD_HEIGHT);
+            if !first {
+                total_height += ROW_GAP;
+            }
+            first = false;
+            total_height += row_height;
+        }
+
+        let total_width = cw.max(max_row_width).min(available);
+        dims[id] = (total_width, total_height);
+    }
+
+    let (total_w, total_h) = dims[root];
     let offset = terminal_width.saturating_sub(total_w) / 2;
 
     place(
@@ -80,11 +118,11 @@ pub fn compute_with(graph: &Graph, terminal_width: usize, preview_limit: usize) 
         &card_widths,
         &node_heights,
         &children,
+        &dims,
         &mut nodes,
         &mut strokes,
     );
 
-    // Merge strokes that share a cell into a single glyph.
     let strokes = merge_strokes(strokes);
 
     Layout {
@@ -130,52 +168,6 @@ fn card_width(node: &crate::graph::GraphNode) -> usize {
     (content_width + 4).min(80)
 }
 
-fn measure(
-    id: usize,
-    card_widths: &[usize],
-    node_heights: &[usize],
-    children: &[Vec<usize>],
-    available: usize,
-) -> (usize, usize) {
-    let cw = card_widths[id].min(available).max(10);
-    let ch = node_heights[id];
-    let child_ids = &children[id];
-    if child_ids.is_empty() {
-        return (cw, ch);
-    }
-
-    let child_dims: Vec<(usize, usize)> = child_ids
-        .iter()
-        .map(|&c| measure(c, card_widths, node_heights, children, available))
-        .collect();
-
-    let rows = wrap_rows(child_ids, &child_dims, available);
-
-    let mut max_row_width = 0usize;
-    let mut total_height = ch + V_GAP;
-    let mut first = true;
-    for row in &rows {
-        let row_width: usize = row.iter().map(|&i| child_dims[i].0).sum::<usize>()
-            + H_GAP * row.len().saturating_sub(1);
-        if row_width > max_row_width {
-            max_row_width = row_width;
-        }
-        let row_height = row
-            .iter()
-            .map(|&i| child_dims[i].1)
-            .max()
-            .unwrap_or(CARD_HEIGHT);
-        if !first {
-            total_height += ROW_GAP;
-        }
-        first = false;
-        total_height += row_height;
-    }
-
-    let total_width = cw.max(max_row_width).min(available);
-    (total_width, total_height)
-}
-
 fn wrap_rows(child_ids: &[usize], dims: &[(usize, usize)], available: usize) -> Vec<Vec<usize>> {
     let mut rows: Vec<Vec<usize>> = Vec::new();
     let mut current: Vec<usize> = Vec::new();
@@ -217,12 +209,13 @@ fn place(
     card_widths: &[usize],
     node_heights: &[usize],
     children: &[Vec<usize>],
+    dims: &[(usize, usize)],
     nodes: &mut [Option<NodeRect>],
     strokes: &mut Vec<Stroke>,
 ) {
     let cw = card_widths[id].min(available).max(10);
     let ch = node_heights[id];
-    let (block_w, _) = measure(id, card_widths, node_heights, children, available);
+    let (block_w, _) = dims[id];
 
     let card_x = origin_x + (block_w.saturating_sub(cw)) / 2;
     let card_y = origin_y;
@@ -238,10 +231,7 @@ fn place(
         return;
     }
 
-    let child_dims: Vec<(usize, usize)> = child_ids
-        .iter()
-        .map(|&c| measure(c, card_widths, node_heights, children, available))
-        .collect();
+    let child_dims: Vec<(usize, usize)> = child_ids.iter().map(|&c| dims[c]).collect();
 
     let rows = wrap_rows(child_ids, &child_dims, available);
 
@@ -289,6 +279,7 @@ fn place(
                 card_widths,
                 node_heights,
                 children,
+                dims,
                 nodes,
                 strokes,
             );

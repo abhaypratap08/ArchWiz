@@ -100,7 +100,7 @@ fn draw_card(canvas: &mut Canvas, rect: NodeRect, node: &GraphNode, preview_limi
             x,
             y + 3 + shown,
             w,
-            &format!("+{} MORE · ENTER TO INSPECT", remaining),
+            &format!("+{} more", remaining),
             color,
             theme::metadata_color(),
         );

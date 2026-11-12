@@ -211,58 +211,59 @@ fn language_name(lang: crate::classifier::SourceLanguage) -> &'static str {
 }
 
 pub fn print_stats(stats: &ProjectStats, use_color: bool) {
-    let _ = use_color;
+    let h = if use_color { "\x1b[1;38;5;51m" } else { "" };
+    let r = if use_color { "\x1b[0m" } else { "" };
+    let m = if use_color { "\x1b[38;5;109m" } else { "" };
     println!();
-    println!("  ARCHWIZ  /  {}  /  STATISTICS", stats.name);
+    println!("  {}ARCHWIZ  /  {}  /  STATISTICS{}", h, stats.name, r);
     println!();
-    println!("  Project: {}", stats.name);
-    println!("  Root:    {}", stats.root);
-    println!("  Files:   {}", stats.total_files);
-    println!("  Dirs:    {}", stats.total_dirs);
-    println!("  Size:    {}", format_size(stats.total_size));
-    println!("  Depth:   {}", stats.max_depth);
+    println!("  {}Project:{} {}", m, r, stats.name);
+    println!("  {}Root:{}    {}", m, r, stats.root);
+    println!("  {}Files:{}   {}", m, r, stats.total_files);
+    println!("  {}Dirs:{}    {}", m, r, stats.total_dirs);
+    println!(
+        "  {}Size:{}    {}",
+        m,
+        r,
+        crate::model::format_size(stats.total_size)
+    );
+    println!("  {}Depth:{}   {}", m, r, stats.max_depth);
     println!();
 
-    println!("  FILE CATEGORIES");
+    println!("  {}FILE CATEGORIES{}", h, r);
     for (k, v) in &stats.kind_counts {
         println!("  {:<16} {:>6}", k, v);
     }
     println!();
 
-    println!("  LANGUAGE DISTRIBUTION");
+    println!("  {}LANGUAGE DISTRIBUTION{}", h, r);
     let max_lang = stats.language_counts.values().copied().max().unwrap_or(1);
     for (lang, count) in &stats.language_counts {
         let bar_len = (*count as f64 / max_lang as f64 * 20.0).round() as usize;
         let bar: String = "█".repeat(bar_len);
-        println!("  {:<14} {:>4}  {}", lang, count, bar);
+        if use_color {
+            println!("  {:<14} {:>4}  \x1b[38;5;75m{}\x1b[0m", lang, count, bar);
+        } else {
+            println!("  {:<14} {:>4}  {}", lang, count, bar);
+        }
     }
     println!();
 
-    println!("  LARGEST FILES");
+    println!("  {}LARGEST FILES{}", h, r);
     for f in stats.largest_files.iter().take(10) {
-        println!("  {:>8}  {}", format_size(f.size), f.path);
+        println!("  {:>8}  {}", crate::model::format_size(f.size), f.path);
     }
     println!();
 
-    println!("  TOP DIRECTORIES BY FILE COUNT");
+    println!("  {}TOP DIRECTORIES BY FILE COUNT{}", h, r);
     for d in stats.top_dirs.iter().take(5) {
         println!("  {:>6}  {}", d.direct_files, d.path);
     }
     println!();
 
-    println!("  DEEPEST DIRECTORIES");
+    println!("  {}DEEPEST DIRECTORIES{}", h, r);
     for d in stats.deepest_dirs.iter().take(5) {
         println!("  {:>6}  {}", d.depth, d.path);
     }
     println!();
-}
-
-fn format_size(bytes: u64) -> String {
-    if bytes < 1024 {
-        format!("{bytes} B")
-    } else if bytes < 1024 * 1024 {
-        format!("{:.1} KiB", bytes as f64 / 1024.0)
-    } else {
-        format!("{:.1} MiB", bytes as f64 / (1024.0 * 1024.0))
-    }
 }

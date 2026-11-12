@@ -75,7 +75,14 @@ fn run(args: Cli) -> Result<(), String> {
     let use_color = renderer::use_color(args.no_color);
 
     println!();
-    println!("  ◈ ARCHWIZ  /  {}  /  SOFTWARE MAP", project_name);
+    if use_color {
+        println!(
+            "  \x1b[1;38;5;51m◈ ARCHWIZ\x1b[0m  \x1b[38;5;109m/\x1b[0m  \x1b[1m{}\x1b[0m  \x1b[38;5;109m/\x1b[0m  \x1b[38;5;109mSOFTWARE MAP\x1b[0m",
+            project_name
+        );
+    } else {
+        println!("  ◈ ARCHWIZ  /  {}  /  SOFTWARE MAP", project_name);
+    }
     println!(
         "  {}  ·  {} nodes  ·  {} connections",
         root_path.display(),

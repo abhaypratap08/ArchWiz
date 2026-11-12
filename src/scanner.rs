@@ -139,7 +139,7 @@ fn scan_recursive(
                 continue;
             }
 
-            let size_bytes = fs::metadata(&entry_path).map(|m| m.len()).unwrap_or(0);
+            let size_bytes = entry.metadata().map(|m| m.len()).unwrap_or(0);
             children.push(Node::File(FileNode {
                 name: entry_name.to_string_lossy().into_owned(),
                 path: entry_path,

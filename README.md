@@ -18,56 +18,28 @@ Unlike traditional tree listings that simply display files and directories, Arch
 
 ## Installation
 
-### Binary Installation (Recommended)
-
-Prebuilt binaries are distributed through GitHub Releases. **Rust and Cargo are not required.**
-
-**Linux**
-
-```sh
-curl --proto '=https' --tlsv1.2 -LsSf https://github.com/abhaypratap08/ArchWiz/releases/latest/download/archwiz-installer.sh | sh
+```bash
+curl -fsSL https://raw.githubusercontent.com/abhaypratap08/ArchWiz/main/install.sh | bash
 ```
 
-**Windows (PowerShell)**
+The installer detects Linux x86_64 or aarch64, installs missing prerequisites using your distribution's package manager, downloads the matching release, verifies its SHA-256 checksum, and installs `archwiz` to `$HOME/.local/bin` by default.
 
-```powershell
-irm https://github.com/abhaypratap08/ArchWiz/releases/latest/download/archwiz-installer.ps1 | iex
+To install into a different directory:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/abhaypratap08/ArchWiz/main/install.sh | ARCHWIZ_INSTALL_DIR="$HOME/Tools/ArchWiz" bash
 ```
 
-> **Note:** Binary installers will become available after the first GitHub Release is published.
+If the installation directory is not on your `PATH`, add it to your shell configuration manually.
 
-### Custom Installation Directory
+### Windows
 
-You can choose where `archwiz` is installed.
+Windows archives are published on the [GitHub Releases](https://github.com/abhaypratap08/ArchWiz/releases) page. Download the archive matching your architecture (`x86_64-pc-windows-msvc` or `aarch64-pc-windows-msvc`), extract it, and run `archwiz.exe`. The Linux `install.sh` does not support native Windows.
 
-**Linux**
+To uninstall:
 
-```sh
-curl --proto '=https' --tlsv1.2 -LsSf https://github.com/abhaypratap08/ArchWiz/releases/latest/download/archwiz-installer.sh | ARCHWIZ_INSTALL_DIR="$HOME/Tools/ArchWiz" sh
-```
-
-**Windows (PowerShell)**
-
-```powershell
-$env:ARCHWIZ_INSTALL_DIR = "$HOME\Tools\ArchWiz"
-irm https://github.com/abhaypratap08/ArchWiz/releases/latest/download/archwiz-installer.ps1 | iex
-```
-
-Ensure your installation directory is included in your system's `PATH`.
-
-### Manual Installation
-
-1. Visit [GitHub Releases](https://github.com/abhaypratap08/ArchWiz/releases).
-2. Download the archive matching your operating system and architecture.
-3. Extract the archive.
-4. Move the `archwiz` executable (or `archwiz.exe` on Windows) into a directory included in your `PATH`.
-
-### Install from Source
-
-If you have Rust and Cargo installed:
-
-```sh
-cargo install --git https://github.com/abhaypratap08/ArchWiz
+```bash
+curl -fsSL https://raw.githubusercontent.com/abhaypratap08/ArchWiz/main/uninstall.sh | bash
 ```
 
 ## Usage

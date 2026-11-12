@@ -204,6 +204,17 @@ fn is_source_ext(ext: &str) -> bool {
     )
 }
 
+pub fn file_kind_label(kind: FileKind) -> &'static str {
+    match kind {
+        FileKind::Source => "SOURCE",
+        FileKind::Test => "TEST",
+        FileKind::Configuration => "CONFIG",
+        FileKind::Documentation => "DOCS",
+        FileKind::Asset => "ASSET",
+        FileKind::Generated => "GEN",
+        FileKind::Other => "OTHER",
+    }
+}
 #[allow(dead_code)]
 pub fn source_language(path: &Path) -> SourceLanguage {
     let ext = path
